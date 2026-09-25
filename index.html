@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDF2EE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bills">
+<meta name="robots" content="noindex, nofollow">
+<title>Dad's Bill Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;800&family=Atkinson+Hyperlegible+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#EDF2EE; --surface:#FFFFFF; --ink:#14231B; --muted:#4B5C52; --line:#C9D6CD;
+  --action:#1D4E9E; --action-ink:#FFFFFF; --action-soft:#E2EAF7;
+  --must:#B71C1C; --must-bg:#FDE6E4; --must-bar:#D32F2F;
+  --imp:#7A4A00; --imp-bg:#FFF0C7; --imp-bar:#F0A91A;
+  --wait:#1F6B2A; --wait-bg:#E0F2E2; --wait-bar:#3A9A48;
+  --good:#1F6B2A; --good-bg:#DDF1DF; --bad:#B71C1C; --bad-bg:#FCE3E1;
+  --shadow:0 1px 2px rgba(20,35,27,.08),0 4px 14px rgba(20,35,27,.06);
+  --font:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Atkinson Hyperlegible Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#101813; --surface:#1A251F; --ink:#EEF4EF; --muted:#AFC0B5; --line:#33443A;
+    --action:#7FA8F0; --action-ink:#0B1A33; --action-soft:#1E2C45;
+    --must:#FF9A91; --must-bg:#3A1917; --must-bar:#F0584B;
+    --imp:#FFD27A; --imp-bg:#3A2C0C; --imp-bar:#F0B53A;
+    --wait:#8FD89A; --wait-bg:#16301B; --wait-bar:#4DB35C;
+    --good:#8FD89A; --good-bg:#16301B; --bad:#FF9A91; --bad-bg:#3A1917;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101813; --surface:#1A251F; --ink:#EEF4EF; --muted:#AFC0B5; --line:#33443A;
+  --action:#7FA8F0; --action-ink:#0B1A33; --action-soft:#1E2C45;
+  --must:#FF9A91; --must-bg:#3A1917; --must-bar:#F0584B;
+  --imp:#FFD27A; --imp-bg:#3A2C0C; --imp-bar:#F0B53A;
+  --wait:#8FD89A; --wait-bg:#16301B; --wait-bar:#4DB35C;
+  --good:#8FD89A; --good-bg:#16301B; --bad:#FF9A91; --bad-bg:#3A1917;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.gate{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding-block:24px}
+.gate-card{width:100%;max-width:440px;display:flex;flex-direction:column;gap:16px;text-align:center}
+.gate-card h1{font-size:30px}
+.gate-form{display:flex;flex-direction:column;gap:16px;text-align:left}
+.gate-ic{width:64px;height:64px;margin:0 auto;color:var(--action)}
+input[type=password]{font:inherit;font-size:22px;min-height:60px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 14px;width:100%}
+.btn-big{min-height:76px;font-size:24px}
+.btn:disabled{opacity:.6}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:20px;line-height:1.4;margin:0;
+  padding-inline:16px;padding-block:calc(12px + env(safe-area-inset-top,0px)) calc(110px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-size:28px;font-weight:800;margin:4px 0 0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:24px;font-weight:800;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:18px;margin:0}
+.money{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--action);outline-offset:2px}
+.btn{min-height:60px;border-radius:14px;padding:12px 18px;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;gap:10px;text-align:center}
+.btn-main{background:var(--action);color:var(--action-ink)}
+.btn-soft{background:var(--action-soft);color:var(--action)}
+.btn-line{border:2px solid var(--line);background:var(--surface)}
+.btn-danger{background:var(--bad);color:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:360px){.row2{grid-template-columns:1fr}}
+
+/* Summary */
+.card{background:var(--surface);border-radius:20px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg);border-radius:14px;padding:4px;gap:4px}
+.seg button{min-height:54px;border-radius:11px;font-weight:700;font-size:17px;color:var(--muted);line-height:1.15;padding:4px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.range{font-size:17px;color:var(--muted);text-align:center;margin-top:-4px}
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-block:6px;border-bottom:1px dashed var(--line)}
+.line:last-of-type{border-bottom:0}
+.line .lbl{font-size:19px}
+.line .lbl small{display:block;color:var(--muted);font-size:16px}
+.line .money{font-size:28px}
+.verdict{border-radius:14px;padding:14px 16px;font-size:21px;font-weight:700;display:flex;gap:12px;align-items:center}
+.verdict .big{font-family:var(--mono);font-size:30px;display:block}
+.verdict.good{background:var(--good-bg);color:var(--good)}
+.verdict.bad{background:var(--bad-bg);color:var(--bad)}
+.verdict .ico{font-size:34px;line-height:1;flex:none}
+
+/* Bill rows */
+.list{display:flex;flex-direction:column;gap:12px}
+.bill{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);display:grid;grid-template-columns:10px 1fr;overflow:hidden}
+.bill .bar{background:var(--line)}
+.bill.must .bar{background:var(--must-bar)} .bill.imp .bar{background:var(--imp-bar)} .bill.wait .bar{background:var(--wait-bar)}
+.bill .body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.bill .top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.bill .name{font-size:22px;font-weight:800;overflow-wrap:anywhere}
+.bill .when{font-size:17px;color:var(--muted)}
+.bill .when.late{color:var(--bad);font-weight:800}
+.bill .amt{font-size:24px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:800;border-radius:999px;padding:3px 10px;text-transform:uppercase;letter-spacing:.04em;width:fit-content}
+.chip.must{background:var(--must-bg);color:var(--must)} .chip.imp{background:var(--imp-bg);color:var(--imp)} .chip.wait{background:var(--wait-bg);color:var(--wait)}
+.canpay{font-size:17px;font-weight:800}
+.canpay.yes{color:var(--good)} .canpay.no{color:var(--bad)}
+.paid-line{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--good-bg);color:var(--good);border-radius:12px;padding:10px 14px;font-weight:800;font-size:18px}
+.paid-line button{text-decoration:underline;font-weight:700;color:var(--ink);min-height:44px;padding:0 6px}
+.bill.is-paid .name,.bill.is-paid .amt{opacity:.6}
+.note{background:var(--surface);border-radius:14px;padding:14px 16px;font-size:18px;border:2px solid var(--line)}
+.empty{text-align:center;padding:28px 16px;display:flex;flex-direction:column;gap:14px;align-items:center}
+.empty p{margin:0;color:var(--muted)}
+
+/* Bills tab */
+.group-h{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;margin-top:6px}
+.dot{width:18px;height:18px;border-radius:50%;flex:none}
+.dot.must{background:var(--must-bar)} .dot.imp{background:var(--imp-bar)} .dot.wait{background:var(--wait-bar)}
+.bill.tap{text-align:left;width:100%}
+.bill.tap .edit{font-size:16px;color:var(--action);font-weight:700}
+
+/* History */
+.hist-month{font-size:18px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:8px}
+.hist{background:var(--surface);border-radius:16px;box-shadow:var(--shadow)}
+.hist .it{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);align-items:start}
+.hist .it:last-child{border-bottom:0}
+.hist .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px;font-weight:800}
+.hist .ic.pay{background:var(--good-bg);color:var(--good)}
+.hist .ic.cash{background:var(--action-soft);color:var(--action)}
+.hist .ic.edit{background:var(--imp-bg);color:var(--imp)}
+.hist .t{font-size:18px;font-weight:700}
+.hist .d{font-size:16px;color:var(--muted)}
+
+/* Tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(3,1fr);gap:6px;z-index:5}
+.tabs button{min-height:64px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:17px;font-weight:800;color:var(--muted)}
+.tabs button svg{width:28px;height:28px}
+.tabs button[aria-current="page"]{background:var(--action-soft);color:var(--action)}
+
+/* Sheet */
+.sheet-bg{position:fixed;inset:0;background:rgba(10,20,14,.5);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:600px;max-height:100%;overflow-y:auto;border-radius:22px 22px 0 0;
+  padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sheet-head button{min-height:48px;padding:0 10px;font-weight:700;color:var(--action);font-size:19px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field > label,.field > .lab{font-weight:800;font-size:20px}
+.field .hint{font-size:16px;color:var(--muted);margin-top:-4px}
+input[type=text],input[type=date],input.amount{font:inherit;font-size:22px;min-height:60px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 14px;width:100%}
+input.amount{font-family:var(--mono);font-size:30px;font-weight:700}
+.dollar{position:relative}
+.dollar::before{content:"$";position:absolute;left:16px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:30px;font-weight:700;color:var(--muted);pointer-events:none}
+.dollar input{padding-left:44px}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{min-height:60px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font-size:20px;font-weight:700;padding:10px 16px;display:flex;align-items:center;gap:12px;text-align:left}
+.choice[aria-pressed="true"]{border-color:var(--action);background:var(--action-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--action)}
+.choice.must[aria-pressed="true"]{border-color:var(--must-bar);background:var(--must-bg);box-shadow:inset 0 0 0 1px var(--must-bar)}
+.choice.imp[aria-pressed="true"]{border-color:var(--imp-bar);background:var(--imp-bg);box-shadow:inset 0 0 0 1px var(--imp-bar)}
+.choice.wait[aria-pressed="true"]{border-color:var(--wait-bar);background:var(--wait-bg);box-shadow:inset 0 0 0 1px var(--wait-bar)}
+.choice small{display:block;font-weight:400;font-size:16px;color:var(--muted)}
+.err{color:var(--bad);font-weight:700;font-size:18px}
+.confirm{background:var(--bad-bg);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.days button,.wdays button{min-height:50px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font-weight:800;font-size:19px;font-family:var(--mono)}
+.wdays{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.wdays button{font-family:var(--font);min-height:56px}
+.days button[aria-pressed="true"],.wdays button[aria-pressed="true"]{background:var(--action);color:var(--action-ink);border-color:var(--action)}
+.next-due{background:var(--good-bg);color:var(--good);border-radius:12px;padding:12px 14px;font-size:18px;font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);
+  padding:14px 20px;border-radius:14px;font-weight:700;font-size:18px;z-index:20;max-width:calc(100% - 32px);text-align:center;box-shadow:var(--shadow)}
+.foot{font-size:15px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<div class="gate" id="gate"><div class="gate-card"><p class="sub">Loading…</p></div></div>
+<div class="wrap" id="app" hidden></div>
+
+<nav class="tabs" aria-label="Main" hidden>
+  <button id="tab-home" data-tab="home" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Home</button>
+  <button id="tab-bills" data-tab="bills">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>My Bills</button>
+  <button id="tab-history" data-tab="history">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>History</button>
+</nav>
+<div id="sheet-root"></div>
+
+<script>
+(function(){
+/* ---------- helpers ---------- */
+const PRI = {must:{label:"Must pay",rank:0,help:"Rent, lights, water, car — pay these first"},
+             imp:{label:"Important",rank:1,help:"Pay after the must-pay bills"},
+             wait:{label:"Can wait",rank:2,help:"Pay these last if money is short"}};
+const FREQ = {monthly:"Every month", biweekly:"Every 2 weeks", weekly:"Every week", dom:"Day of the month"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => (n < 0 ? "−" : "") + "$" + Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const pad = n => String(n).padStart(2,"0");
+const iso = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseISO = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d); };
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const today = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
+const dayDiff = (a,b) => Math.round((b - a) / 864e5);
+const nice = d => d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+const short = d => d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+const ordinal = n => n + (["th","st","nd","rd"][(n%100>10&&n%100<14)?0:(n%10<4?n%10:0)] || "th");
+const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const parseMoney = s => { const v = parseFloat(String(s).replace(/[^0-9.]/g,"")); return isFinite(v) ? Math.round(v*100)/100 : NaN; };
+const cents = n => Math.round(n*100)/100;
+
+/* ---------- settings: paste your Supabase details here ---------- */
+const CONFIG = {
+  SUPABASE_URL: "PASTE_YOUR_PROJECT_URL_HERE",
+  SUPABASE_KEY: "PASTE_YOUR_ANON_OR_PUBLISHABLE_KEY_HERE"
+};
+
+/* ---------- state + storage ---------- */
+const S = { bills:{}, paid:{}, wallet:{balance:0, log:[]}, mode:"loading", tab:"home", view:"week", readOnly:false };
+let db = null, sb = null, uid = null, userEmail = "", pendingSave = false;
+const CACHE_KEY = "dads-bill-book-cache", PK_KEY = "dads-bill-book-passkey", ASKED_KEY = "dads-bill-book-asked";
+const ls = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+             set(k,v){ try { localStorage.setItem(k,v); } catch(e){} },
+             del(k){ try { localStorage.removeItem(k); } catch(e){} } };
+function cacheSave(){ ls.set(CACHE_KEY, JSON.stringify({uid, bills:S.bills, paid:S.paid, wallet:S.wallet})); }
+let saveTimer = null;
+function saveSoon(){ pendingSave = true; cacheSave(); clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 500); }
+async function saveNow(){
+  clearTimeout(saveTimer);
+  if (!sb || !uid || !pendingSave) return;
+  pendingSave = false;
+  const { error } = await sb.from("app_state").upsert({ user_id: uid, data: {bills:S.bills, paid:S.paid, wallet:S.wallet}, updated_at: new Date().toISOString() });
+  if (error){ pendingSave = true; toast("Couldn't save. Check your internet. It will try again."); saveTimer = setTimeout(saveNow, 8000); }
+}
+window.addEventListener("pagehide", () => { if (pendingSave) saveNow(); });
+
+function handleErr(){ toast("Couldn't save. Check your internet and try again."); }
+const store = {
+  bill(id, data){ S.bills[id] = data; saveSoon(); render(); },
+  setPaid(id, rec){ S.paid[id] = rec; saveSoon(); render(); },
+  unPaid(id){ delete S.paid[id]; saveSoon(); render(); },
+  wallet(w){ S.wallet = w; saveSoon(); render(); }
+};
+function walletChange(newBal, entry){
+  const log = [entry, ...(S.wallet.log||[])].slice(0, 400);
+  store.wallet({ balance: cents(newBal), log });
+}
+
+/* ---------- bill math ---------- */
+function occurrences(bill, start, end){
+  const out = []; const a = parseISO(bill.anchor);
+  if (bill.freq === "monthly" || bill.freq === "dom"){
+    const day = a.getDate();
+    let from = a > start ? a : start;
+    let y = from.getFullYear(), m = from.getMonth();
+    for (let i=0;i<40;i++){
+      const dim = new Date(y, m+1, 0).getDate();
+      const d = new Date(y, m, Math.min(day, dim));
+      if (d > end) break;
+      if (d >= start && d >= a) out.push(d);
+      m++; if (m > 11){ m = 0; y++; }
+    }
+  } else {
+    const step = bill.freq === "weekly" ? 7 : 14;
+    let d = new Date(a);
+    if (d < start){ const k = Math.floor(dayDiff(a, start) / step); d = addDays(a, k*step); if (d < start) d = addDays(d, step); }
+    for (let i=0; d <= end && i<80; i++){ out.push(d); d = addDays(d, step); }
+  }
+  return out;
+}
+function windowFor(view){
+  const t = today();
+  if (view === "week") return { start:t, end:addDays(t,6), label: short(t)+" – "+short(addDays(t,6)) };
+  if (view === "month"){ const s = new Date(t.getFullYear(), t.getMonth(), 1), e = new Date(t.getFullYear(), t.getMonth()+1, 0);
+    return { start:s, end:e, label: s.toLocaleDateString("en-US",{month:"long",year:"numeric"}) }; }
+  const s = new Date(t.getFullYear(), t.getMonth()+1, 1), e = new Date(t.getFullYear(), t.getMonth()+2, 0);
+  return { start:s, end:e, label: s.toLocaleDateString("en-US",{month:"long",year:"numeric"}) };
+}
+function itemsFor(view){
+  const w = windowFor(view), t = today(), map = new Map();
+  const active = Object.entries(S.bills).filter(([,b]) => b.active !== false);
+  const add = (id, b, d) => {
+    const key = id + "__" + iso(d); if (map.has(key)) return;
+    const rec = S.paid[key];
+    map.set(key, { key, id, bill:b, date:d, amount: rec ? rec.amount : b.amount, paid: !!rec, paidOn: rec && rec.paidOn, late: !rec && d < t });
+  };
+  for (const [id,b] of active){
+    occurrences(b, w.start, w.end).forEach(d => add(id,b,d));
+    if (view !== "next") occurrences(b, addDays(t,-90), addDays(t,-1)).forEach(d => { if (!S.paid[id+"__"+iso(d)]) add(id,b,d); });
+  }
+  return { w, items:[...map.values()] };
+}
+function plan(items, money){
+  const unpaid = items.filter(i => !i.paid).sort((a,b) =>
+    PRI[a.bill.pri].rank - PRI[b.bill.pri].rank || (b.late - a.late) || a.date - b.date);
+  let left = money;
+  unpaid.forEach(i => { if (left >= i.amount - 0.001){ i.canPay = true; left = cents(left - i.amount); } else i.canPay = false; });
+  return unpaid;
+}
+function perMonth(b){ return b.freq === "weekly" ? b.amount*52/12 : b.freq === "biweekly" ? b.amount*26/12 : b.amount; }
+function scheduleText(b){
+  const a = parseISO(b.anchor);
+  const nx = occurrences(b, today(), addDays(today(), 60))[0];
+  if (b.freq === "monthly" || b.freq === "dom") return "Every month on the " + ordinal(a.getDate()) + (nx ? " · next " + nice(nx) : "");
+  if (b.freq === "weekly") return "Every " + ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][a.getDay()] + (nx ? " · next " + nice(nx) : "");
+  const next = occurrences(b, today(), addDays(today(), 30))[0];
+  return FREQ[b.freq] + (next ? " · next " + nice(next) : "");
+}
+
+/* ---------- render ---------- */
+function render(){
+  document.querySelectorAll(".tabs button").forEach(b => { if (b.dataset.tab === S.tab) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
+  const app = $("#app");
+  if (S.mode === "loading"){ return; }
+  app.innerHTML = S.tab === "home" ? homeHTML() : S.tab === "bills" ? billsHTML() : historyHTML();
+}
+
+function billRow(i, showPlan){
+  const p = i.bill.pri;
+  const when = i.late ? "LATE — was due " + nice(i.date) : "Due " + nice(i.date);
+  let bottom;
+  if (i.paid) bottom = `<div class="paid-line"><span>✓ Paid${i.paidOn ? " " + short(new Date(i.paidOn)) : ""}</span><button data-act="unpay" data-key="${i.key}">Undo</button></div>`;
+  else bottom = `${showPlan ? `<div class="canpay ${i.canPay?"yes":"no"}">${i.canPay ? "✓ You have money for this" : "✗ Not enough money yet"}</div>` : ""}
+    ${S.readOnly ? "" : `<button class="btn ${i.canPay===false?"btn-line":"btn-main"}" data-act="pay" data-key="${i.key}">Mark as paid</button>`}`;
+  return `<article class="bill ${p} ${i.paid?"is-paid":""}"><div class="bar"></div><div class="body">
+    <div class="top"><div><div class="name">${esc(i.bill.name)}</div><div class="when ${i.late?"late":""}">${when}</div></div>
+    <div class="amt money">${fmt(i.amount)}</div></div>
+    <span class="chip ${p}">${PRI[p].label}</span>${bottom}</div></article>`;
+}
+
+function homeHTML(){
+  const hasBills = Object.values(S.bills).some(b => b.active !== false);
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  let h = `<header><h1>${hello}</h1><p class="sub">${today().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p></header>`;
+  if (!hasBills){
+    return h + `<section class="card empty"><h2>Let's add your bills</h2>
+      <p>Add each bill once — rent, lights, phone, car. The app will remember them and tell you what's due.</p>
+      ${S.readOnly?"":`<button class="btn btn-main" style="width:100%" data-act="add-bill">+ Add my first bill</button>`}</section>` + modeNote();
+  }
+  const { w, items } = itemsFor(S.view);
+  const unpaid = items.filter(i => !i.paid);
+  const toPay = cents(unpaid.reduce((s,i) => s + i.amount, 0));
+  const have = S.wallet.balance || 0;
+  const diff = cents(have - toPay);
+  const short_ = diff < 0;
+  const ordered = short_ ? plan(items, have) : null;
+  const lateCount = unpaid.filter(i => i.late).length;
+
+  h += `<section class="card" aria-label="Money summary">
+    <div class="seg" role="group" aria-label="Show bills for">
+      ${[["week","This week"],["month","This month"],["next","Next month"]].map(([k,l]) =>
+        `<button data-act="view" data-view="${k}" aria-pressed="${S.view===k}">${l}</button>`).join("")}
+    </div>
+    <div class="range">${w.label}${lateCount && S.view!=="next" ? ` · includes ${lateCount} late` : ""}</div>
+    <div class="line"><span class="lbl">Bills still to pay<small>${unpaid.length} bill${unpaid.length===1?"":"s"}</small></span><span class="money">${fmt(toPay)}</span></div>
+    <div class="line"><span class="lbl">Money you have</span><span class="money">${fmt(have)}</span></div>
+    ${unpaid.length === 0
+      ? `<div class="verdict good"><span class="ico">✓</span><span>All paid up for ${S.view==="week"?"this week":S.view==="month"?"this month":"next month"}!</span></div>`
+      : short_
+      ? `<div class="verdict bad"><span class="ico">!</span><span>You need<span class="big">${fmt(-diff)}</span>more to pay everything</span></div>`
+      : `<div class="verdict good"><span class="ico">✓</span><span>You have enough!<span class="big">${fmt(diff)}</span>left over after bills</span></div>`}
+    ${S.readOnly ? "" : `<div class="row2"><button class="btn btn-main" data-act="add-money">+ I put in money</button>
+      <button class="btn btn-soft" data-act="set-money">Change my amount</button></div>`}
+  </section>`;
+
+  if (items.length === 0){
+    h += `<div class="note">No bills are due ${S.view==="week"?"in the next 7 days":"in "+w.label}.</div>`;
+  } else if (short_){
+    h += `<h2>Pay these first</h2><p class="sub" style="margin-top:-10px">There isn't enough for everything, so the most important bills are at the top.</p>
+      <div class="list">${ordered.map(i => billRow(i, true)).join("")}</div>`;
+    const done = items.filter(i => i.paid).sort((a,b)=>a.date-b.date);
+    if (done.length) h += `<h2>Already paid</h2><div class="list">${done.map(i => billRow(i,false)).join("")}</div>`;
+  } else {
+    const sorted = [...items].sort((a,b) => (a.paid - b.paid) || (b.late - a.late) || a.date - b.date);
+    h += `<h2>Bills ${S.view==="week"?"due this week":"for "+w.label}</h2><div class="list">${sorted.map(i => billRow(i,false)).join("")}</div>`;
+  }
+  return h + modeNote();
+}
+
+function billsHTML(){
+  const all = Object.entries(S.bills).filter(([,b]) => b.active !== false);
+  const monthly = cents(all.reduce((s,[,b]) => s + perMonth(b), 0));
+  let h = `<header><h1>My Bills</h1><p class="sub">${all.length ? `About <span class="money">${fmt(monthly)}</span> a month in bills` : "No bills yet"}</p></header>
+    ${S.readOnly ? "" : `<button class="btn btn-main" data-act="add-bill">+ Add a bill</button>`}`;
+  for (const p of ["must","imp","wait"]){
+    const group = all.filter(([,b]) => b.pri === p).sort((a,b) => a[1].name.localeCompare(b[1].name));
+    h += `<div class="group-h"><span class="dot ${p}"></span>${PRI[p].label} <span class="sub">(${group.length})</span></div>`;
+    if (!group.length){ h += `<p class="sub" style="margin-top:-8px">None</p>`; continue; }
+    h += `<div class="list">` + group.map(([id,b]) => `
+      <button class="bill tap ${p}" data-act="edit-bill" data-id="${id}" ${S.readOnly?"disabled":""}><div class="bar"></div><div class="body">
+        <div class="top"><div><div class="name">${esc(b.name)}</div><div class="when">${scheduleText(b)}</div></div>
+        <div class="amt money">${fmt(b.amount)}</div></div>
+        ${S.readOnly?"":`<span class="edit">Tap to change ›</span>`}</div></button>`).join("") + `</div>`;
+  }
+  return h;
+}
+
+function historyHTML(){
+  const ev = [];
+  for (const [k,r] of Object.entries(S.paid)) ev.push({ when:r.paidOn, kind:"pay", t:`Paid ${r.name} — ${fmt(r.amount)}`, d:`Was due ${nice(parseISO(r.due))}` });
+  for (const e of (S.wallet.log||[])) ev.push({ when:e.when, kind:"cash",
+    t: e.type === "add" ? `Put in ${fmt(e.amount)}` : e.type === "set" ? `Changed money to ${fmt(e.amount)}` : e.type === "pay" ? `Took out ${fmt(e.amount)} for ${e.name}` : `Put back ${fmt(e.amount)} (undo ${e.name})`,
+    d: `Money after: ${fmt(e.balance)}` });
+  for (const b of Object.values(S.bills)) for (const x of (b.history||[])) ev.push({ when:x.when, kind:"edit", t:x.text, d:b.name });
+  ev.sort((a,b) => (b.when||"").localeCompare(a.when||""));
+  let h = `<header><h1>History</h1><p class="sub">Every payment, money change, and bill change is kept here.</p></header>`;
+  if (!ev.length) return h + `<div class="note">Nothing yet. When you pay a bill or put in money, it will show up here.</div>` + settingsHTML();
+  const shown = ev.slice(0, S.histLimit || 60);
+  let cur = "", open = false;
+  for (const e of shown){
+    const dt = new Date(e.when);
+    const m = dt.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+    if (m !== cur){ if (open) h += `</div>`; h += `<div class="hist-month">${m}</div><div class="hist">`; cur = m; open = true; }
+    const icon = e.kind === "pay" ? "✓" : e.kind === "cash" ? "$" : "✎";
+    h += `<div class="it"><div class="ic ${e.kind}">${icon}</div><div><div class="t">${esc(e.t)}</div>
+      <div class="d">${short(dt)}, ${dt.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})} · ${esc(e.d)}</div></div></div>`;
+  }
+  if (open) h += `</div>`;
+  if (ev.length > shown.length) h += `<button class="btn btn-soft" data-act="more-hist">Show older</button>`;
+  return h + settingsHTML();
+}
+
+function modeNote(){ return S.offline ? `<p class="foot">No internet right now. Showing your last saved bills.</p>` : ""; }
+
+/* ---------- actions ---------- */
+function toast(msg){
+  const old = document.querySelector(".toast"); if (old) old.remove();
+  const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role","status"); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+function payItem(key){
+  const [id, due] = key.split("__"); const b = S.bills[id]; if (!b) return;
+  const now = new Date().toISOString();
+  store.setPaid(key, { billId:id, due, amount:b.amount, name:b.name, paidOn:now });
+  const bal = cents((S.wallet.balance||0) - b.amount);
+  walletChange(bal, { when:now, type:"pay", amount:b.amount, name:b.name, balance:bal });
+  toast(`${b.name} paid. ${fmt(b.amount)} taken out of your money.`);
+}
+function unpayItem(key){
+  const rec = S.paid[key]; if (!rec) return;
+  store.unPaid(key);
+  const bal = cents((S.wallet.balance||0) + rec.amount);
+  walletChange(bal, { when:new Date().toISOString(), type:"undo", amount:rec.amount, name:rec.name, balance:bal });
+  toast(`Undone. ${fmt(rec.amount)} put back.`);
+}
+
+document.addEventListener("click", e => {
+  const tab = e.target.closest(".tabs button");
+  if (tab){ S.tab = tab.dataset.tab; render(); window.scrollTo(0,0); return; }
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const a = el.dataset.act;
+  if (a === "view"){ S.view = el.dataset.view; render(); }
+  else if (a === "pay") payItem(el.dataset.key);
+  else if (a === "unpay") unpayItem(el.dataset.key);
+  else if (a === "add-money") moneySheet("add");
+  else if (a === "set-money") moneySheet("set");
+  else if (a === "add-bill") billSheet(null);
+  else if (a === "edit-bill") billSheet(el.dataset.id);
+  else if (a === "more-hist"){ S.histLimit = (S.histLimit||60) + 60; render(); }
+  else if (a === "pk-on") offerPasskey(true);
+  else if (a === "pk-off"){ ls.del(PK_KEY); toast("Phone unlock turned off."); render(); }
+  else if (a === "signout") signOut();
+});
+
+/* ---------- sheets ---------- */
+function openSheet(html, onMount){
+  const root = $("#sheet-root");
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  const bg = root.querySelector(".sheet-bg");
+  bg.addEventListener("click", ev => { if (ev.target === bg || ev.target.closest("[data-close]")) closeSheet(); });
+  onMount(root.querySelector(".sheet"));
+}
+function closeSheet(){ $("#sheet-root").innerHTML = ""; }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+function moneySheet(kind){
+  const add = kind === "add";
+  openSheet(`<div class="sheet-head"><h2>${add ? "I put in money" : "Change my amount"}</h2><button data-close>Cancel</button></div>
+    <p class="sub">${add ? "How much did you put in your account?" : "How much money do you have for bills right now? This replaces the old amount."}</p>
+    <p class="sub">Right now: <span class="money">${fmt(S.wallet.balance||0)}</span></p>
+    <form class="field" id="mf" novalidate>
+      <label for="money-in">${add ? "Amount I put in" : "My money now"}</label>
+      <div class="dollar"><input class="amount" id="money-in" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
+      <div class="err" id="money-err" hidden></div>
+      <button class="btn btn-main" type="submit">${add ? "Add this money" : "Save amount"}</button>
+    </form>`, sh => {
+      const inp = sh.querySelector("#money-in"); setTimeout(() => inp.focus(), 60);
+      sh.querySelector("#mf").addEventListener("submit", ev => {
+        ev.preventDefault();
+        const v = parseMoney(inp.value);
+        const err = sh.querySelector("#money-err");
+        if (!isFinite(v) || inp.value.trim() === ""){ err.textContent = "Type an amount, like 250 or 250.50"; err.hidden = false; return; }
+        const now = new Date().toISOString();
+        if (add){ const bal = cents((S.wallet.balance||0) + v); walletChange(bal, {when:now, type:"add", amount:v, balance:bal}); toast(`Added ${fmt(v)}. You now have ${fmt(bal)}.`); }
+        else { walletChange(v, {when:now, type:"set", amount:v, balance:v}); toast(`Saved. You have ${fmt(v)}.`); }
+        closeSheet();
+      });
+  });
+}
+
+const WD = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+function nextMonthly(day){
+  const t = today();
+  let d = new Date(t.getFullYear(), t.getMonth(), Math.min(day, new Date(t.getFullYear(), t.getMonth()+1, 0).getDate()));
+  if (d < t) d = new Date(t.getFullYear(), t.getMonth()+1, Math.min(day, new Date(t.getFullYear(), t.getMonth()+2, 0).getDate()));
+  return d;
+}
+function nextWeekly(wd){ const t = today(); return addDays(t, (wd - t.getDay() + 7) % 7); }
+function scheduleShort(freq, anchor){
+  const a = parseISO(anchor);
+  if (freq === "monthly" || freq === "dom") return "every month on the " + ordinal(a.getDate());
+  if (freq === "weekly") return "every " + WD[a.getDay()];
+  return "every 2 weeks starting " + nice(a);
+}
+
+function billSheet(id){
+  const b = id ? S.bills[id] : null;
+  const a0 = b ? parseISO(b.anchor) : null;
+  const st = { freq: b ? b.freq : "monthly", pri: b ? b.pri : "must",
+               day: a0 ? a0.getDate() : null, wd: a0 ? a0.getDay() : null, date: b ? b.anchor : "" };
+  const FREQ_LABEL = {monthly:["Every month","Pick the next due date"],
+                      biweekly:["Every 2 weeks","Pick the next due date"],
+                      weekly:["Every week","Pick the day of the week"],
+                      dom:["Day of the month","Pick the number, like the 1st or the 15th"]};
+  openSheet(`<div class="sheet-head"><h2>${b ? "Change bill" : "Add a bill"}</h2><button data-close>Cancel</button></div>
+    <form id="bf" novalidate style="display:flex;flex-direction:column;gap:20px">
+      <div class="field"><label for="b-name">Bill name</label>
+        <input type="text" id="b-name" autocomplete="off" placeholder="Like: Rent, Electric, Phone" value="${esc(b ? b.name : "")}"></div>
+      <div class="field"><label for="b-amt">How much is it?</label>
+        <div class="dollar"><input class="amount" id="b-amt" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${b ? b.amount.toFixed(2) : ""}"></div></div>
+      <div class="field"><span class="lab">How often?</span><div class="choices" id="b-freq">
+        ${Object.entries(FREQ_LABEL).map(([k,[l,s]]) => `<button type="button" class="choice" data-freq="${k}" aria-pressed="${st.freq===k}"><span>${l}<small>${s}</small></span></button>`).join("")}</div></div>
+      <div class="field" id="b-when"></div>
+      <div class="field"><span class="lab">How important is it?</span><div class="choices" id="b-pri">
+        ${Object.entries(PRI).map(([k,p]) => `<button type="button" class="choice ${k}" data-pri="${k}" aria-pressed="${st.pri===k}"><span class="dot ${k}"></span><span>${p.label}<small>${p.help}</small></span></button>`).join("")}</div></div>
+      <div class="err" id="b-err" hidden></div>
+      <button class="btn btn-main" type="submit">${b ? "Save changes" : "Save bill"}</button>
+      ${b ? `<div id="del-zone"><button type="button" class="btn btn-line" style="width:100%;color:var(--bad)" id="del-ask">Remove this bill</button></div>` : ""}
+    </form>`, sh => {
+      const when = sh.querySelector("#b-when");
+      const nextDate = () => st.freq === "dom" ? (st.day ? nextMonthly(st.day) : null)
+        : st.freq === "weekly" ? (st.wd !== null ? nextWeekly(st.wd) : null)
+        : (st.date ? (occurrences({freq:st.freq, anchor:st.date}, today(), addDays(today(), 400))[0] || null) : null);
+      const nextLine = () => { const n = nextDate(); return n ? `<div class="next-due">✓ Next one due: <strong>${nice(n)}</strong>. It repeats automatically.</div>` : ""; };
+      const drawWhen = () => {
+        if (st.freq === "dom"){
+          when.innerHTML = `<span class="lab">What day of the month is it due?</span>
+            <div class="days" id="b-days">${Array.from({length:31},(_,i)=>i+1).map(n => `<button type="button" data-day="${n}" aria-pressed="${st.day===n}" aria-label="Day ${n}">${n}</button>`).join("")}</div>
+            ${st.day > 28 ? `<div class="hint">In shorter months it will be due on the last day.</div>` : ""}${nextLine()}`;
+        } else if (st.freq === "weekly"){
+          when.innerHTML = `<span class="lab">What day of the week is it due?</span>
+            <div class="wdays" id="b-wd">${WD.map((w,i) => `<button type="button" data-wd="${i}" aria-pressed="${st.wd===i}">${w.slice(0,3)}</button>`).join("")}</div>${nextLine()}`;
+        } else {
+          when.innerHTML = `<label for="b-date">When is the next one due?</label>
+            <div class="hint">After that it repeats ${st.freq === "monthly" ? "every month on the same day" : "every 2 weeks"}.</div>
+            <input type="date" id="b-date" value="${st.date}">${nextLine()}`;
+          sh.querySelector("#b-date").addEventListener("change", ev => { st.date = ev.target.value; drawWhen(); });
+        }
+      };
+      drawWhen();
+      when.addEventListener("click", ev => {
+        const d = ev.target.closest("[data-day]"), w = ev.target.closest("[data-wd]");
+        if (d){ st.day = +d.dataset.day; drawWhen(); }
+        if (w){ st.wd = +w.dataset.wd; drawWhen(); }
+      });
+      sh.querySelector("#b-freq").addEventListener("click", ev => { const c = ev.target.closest("[data-freq]"); if (!c) return; st.freq = c.dataset.freq;
+        sh.querySelectorAll("[data-freq]").forEach(x => x.setAttribute("aria-pressed", x === c)); drawWhen(); });
+      sh.querySelector("#b-pri").addEventListener("click", ev => { const c = ev.target.closest("[data-pri]"); if (!c) return; st.pri = c.dataset.pri;
+        sh.querySelectorAll("[data-pri]").forEach(x => x.setAttribute("aria-pressed", x === c)); });
+      if (!b) setTimeout(() => sh.querySelector("#b-name").focus(), 60);
+      const del = sh.querySelector("#del-ask");
+      if (del) del.addEventListener("click", () => {
+        sh.querySelector("#del-zone").innerHTML = `<div class="confirm"><strong>Remove ${esc(b.name)}?</strong>
+          <span class="sub">It won't show up anymore. Past payments stay in History.</span>
+          <div class="row2"><button type="button" class="btn btn-line" id="del-no">Keep it</button><button type="button" class="btn btn-danger" id="del-yes">Remove</button></div></div>`;
+        sh.querySelector("#del-no").onclick = () => billSheet(id);
+        sh.querySelector("#del-yes").onclick = () => {
+          const h = [{when:new Date().toISOString(), text:`Removed ${b.name}`}, ...(b.history||[])].slice(0,60);
+          store.bill(id, {...b, active:false, history:h}); if (db) render(); closeSheet(); toast(`${b.name} removed.`);
+        };
+      });
+      sh.querySelector("#bf").addEventListener("submit", ev => {
+        ev.preventDefault();
+        const name = sh.querySelector("#b-name").value.trim();
+        const amt = parseMoney(sh.querySelector("#b-amt").value);
+        const err = sh.querySelector("#b-err");
+        const whenMissing = st.freq === "dom" ? (!st.day && "Tap the day of the month it's due.")
+          : st.freq === "weekly" ? (st.wd === null && "Tap the day of the week it's due.")
+          : (!st.date && "Pick the date the next one is due.");
+        const problem = !name ? "Type a name for the bill." : !(amt > 0) ? "Type how much the bill is, like 85 or 85.50." : whenMissing || "";
+        if (problem){ err.textContent = problem; err.hidden = false; return; }
+        let anchor;
+        if (st.freq === "dom") anchor = (b && (b.freq === "dom" || b.freq === "monthly") && a0.getDate() === st.day) ? b.anchor : iso(nextMonthly(st.day));
+        else if (st.freq === "weekly") anchor = (b && b.freq === "weekly" && a0.getDay() === st.wd) ? b.anchor : iso(nextWeekly(st.wd));
+        else anchor = st.date;
+        const now = new Date().toISOString();
+        const data = { name, amount:amt, freq:st.freq, anchor, pri:st.pri, active:true };
+        let hist = b ? [...(b.history||[])] : [];
+        if (!b) hist.unshift({when:now, text:`Added ${name}: ${fmt(amt)}, ${scheduleShort(st.freq, anchor)}, ${PRI[st.pri].label.toLowerCase()}`});
+        else {
+          const ch = [];
+          if (b.name !== name) ch.push(`Name changed from ${b.name} to ${name}`);
+          if (b.amount !== amt) ch.push(`${name} amount changed from ${fmt(b.amount)} to ${fmt(amt)}`);
+          const oldS = scheduleShort(b.freq, b.anchor), newS = scheduleShort(st.freq, anchor);
+          if (oldS !== newS) ch.push(`${name} changed from ${oldS} to ${newS}`);
+          if (b.pri !== st.pri) ch.push(`${name} changed from ${PRI[b.pri].label} to ${PRI[st.pri].label}`);
+          if (!ch.length){ closeSheet(); return; }
+          ch.forEach(t => hist.unshift({when:now, text:t}));
+        }
+        data.history = hist.slice(0,60);
+        data.created = b ? (b.created || now) : now;
+        store.bill(id || newId("b"), data); if (db) render();
+        closeSheet(); toast(b ? "Changes saved." : `${name} added. Next one due ${nice(parseISO(anchor))}.`);
+      });
+  });
+}
+
+/* ---------- sign in + phone unlock ---------- */
+const gate = $("#gate"), tabsEl = document.querySelector(".tabs"), appEl = $("#app");
+function showGate(html){ gate.innerHTML = `<div class="gate-card">${html}</div>`; gate.hidden = false; tabsEl.hidden = true; appEl.hidden = true; closeSheet(); }
+function hideGate(){ gate.hidden = true; gate.innerHTML = ""; tabsEl.hidden = false; appEl.hidden = false; }
+const lockIcon = `<svg class="gate-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>`;
+
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64 = str => { str = str.replace(/-/g,"+").replace(/_/g,"/"); while (str.length % 4) str += "="; return Uint8Array.from(atob(str), c => c.charCodeAt(0)); };
+let pkSupported = null;
+async function passkeySupported(){
+  if (pkSupported !== null) return pkSupported;
+  try { pkSupported = !!(window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); }
+  catch(e){ pkSupported = false; }
+  return pkSupported;
+}
+
+function loginScreen(msg){
+  showGate(`${lockIcon}<h1>Dad's Bill Book</h1><p class="sub">Sign in to see your bills.</p>
+    <form id="login" class="gate-form" novalidate>
+      <div class="field"><label for="li-email">Email</label><input type="text" id="li-email" inputmode="email" autocomplete="username" autocapitalize="off" value="${esc(ls.get("dads-bill-book-email") || "")}"></div>
+      <div class="field"><label for="li-pass">Password</label><input type="password" id="li-pass" autocomplete="current-password"></div>
+      <div class="err" id="li-err" ${msg ? "" : "hidden"}>${esc(msg||"")}</div>
+      <button class="btn btn-main" type="submit" id="li-go">Sign in</button>
+    </form>`);
+  const f = $("#login");
+  f.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const email = $("#li-email").value.trim(), password = $("#li-pass").value, err = $("#li-err"), go = $("#li-go");
+    if (!email || !password){ err.textContent = "Type your email and password."; err.hidden = false; return; }
+    go.disabled = true; go.textContent = "Signing in…";
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    go.disabled = false; go.textContent = "Sign in";
+    if (error){ err.textContent = /invalid/i.test(error.message) ? "That email or password isn't right. Try again." : "Couldn't sign in. Check your internet and try again."; err.hidden = false; return; }
+    ls.set("dads-bill-book-email", email);
+    uid = data.user.id; userEmail = data.user.email || email;
+    if (ls.get(PK_KEY) || ls.get(ASKED_KEY) || !(await passkeySupported())) openApp();
+    else offerPasskey(false);
+  });
+}
+
+function offerPasskey(fromSettings){
+  showGate(`${lockIcon}<h1>Open with your phone's lock?</h1>
+    <p class="sub">Next time, use Face ID, your fingerprint, or your phone's passcode instead of typing your password.</p>
+    <div class="err" id="pk-err" hidden></div>
+    <button class="btn btn-main" id="pk-yes">Yes, turn it on</button>
+    <button class="btn btn-soft" id="pk-no">Not now</button>`);
+  $("#pk-no").onclick = () => { ls.set(ASKED_KEY, "1"); openApp(); };
+  $("#pk-yes").onclick = async () => {
+    try {
+      const cred = await navigator.credentials.create({ publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: "Dad's Bill Book", id: location.hostname },
+        user: { id: new TextEncoder().encode(uid), name: userEmail || "Bill Book", displayName: userEmail || "Bill Book" },
+        pubKeyCredParams: [{type:"public-key", alg:-7}, {type:"public-key", alg:-257}],
+        authenticatorSelection: { authenticatorAttachment:"platform", userVerification:"required", residentKey:"preferred" },
+        timeout: 60000 } });
+      ls.set(PK_KEY, b64(cred.rawId)); ls.set(ASKED_KEY, "1");
+      openApp(); toast("Phone unlock is on.");
+    } catch(e){
+      const err = $("#pk-err"); err.textContent = "That didn't work. You can try again, or tap Not now."; err.hidden = false;
+    }
+  };
+}
+
+function lockScreen(){
+  showGate(`${lockIcon}<h1>Dad's Bill Book</h1><p class="sub">Tap to open with Face ID, your fingerprint, or your phone's passcode.</p>
+    <div class="err" id="lk-err" hidden></div>
+    <button class="btn btn-main btn-big" id="lk-go">Unlock</button>
+    <button class="btn btn-line" id="lk-pass">Use my password instead</button>`);
+  $("#lk-pass").onclick = () => loginScreen();
+  $("#lk-go").onclick = async () => {
+    try {
+      await navigator.credentials.get({ publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)), rpId: location.hostname,
+        allowCredentials: [{ type:"public-key", id: unb64(ls.get(PK_KEY)), transports:["internal","hybrid"] }],
+        userVerification: "required", timeout: 60000 } });
+      openApp();
+    } catch(e){
+      const err = $("#lk-err"); err.textContent = "Didn't unlock. Tap Unlock to try again, or use your password."; err.hidden = false;
+    }
+  };
+}
+
+async function loadData(){
+  const { data, error } = await sb.from("app_state").select("data").eq("user_id", uid).maybeSingle();
+  if (error){
+    let c = null; try { c = JSON.parse(ls.get(CACHE_KEY) || "null"); } catch(e){}
+    if (c && c.uid === uid){ S.bills = c.bills||{}; S.paid = c.paid||{}; S.wallet = c.wallet||{balance:0,log:[]}; }
+    S.offline = true; return;
+  }
+  S.offline = false;
+  const d = (data && data.data) || {};
+  S.bills = d.bills || {}; S.paid = d.paid || {}; S.wallet = d.wallet || {balance:0, log:[]};
+  cacheSave();
+}
+let unlocked = false, hiddenAt = 0;
+async function openApp(){
+  hideGate(); unlocked = true;
+  S.mode = "loading"; appEl.innerHTML = `<p class="sub" style="padding:40px 0;text-align:center">Loading your bills…</p>`;
+  await loadData();
+  S.mode = "cloud"; render();
+}
+async function signOut(){
+  if (pendingSave) await saveNow();
+  await sb.auth.signOut();
+  ls.del(PK_KEY); ls.del(ASKED_KEY); ls.del(CACHE_KEY);
+  unlocked = false; uid = null; S.bills = {}; S.paid = {}; S.wallet = {balance:0, log:[]};
+  loginScreen();
+}
+function settingsHTML(){
+  const pk = !!ls.get(PK_KEY);
+  return `<div class="hist-month">Settings</div><div class="card">
+    <div class="line"><span class="lbl">Phone unlock<small>Face ID, fingerprint, or phone passcode</small></span><strong>${pk ? "On" : "Off"}</strong></div>
+    ${pk ? `<button class="btn btn-line" data-act="pk-off">Turn off phone unlock</button>`
+         : (pkSupported ? `<button class="btn btn-soft" data-act="pk-on">Turn on phone unlock</button>` : "")}
+    <button class="btn btn-line" data-act="signout">Sign out</button>
+  </div>`;
+}
+document.addEventListener("visibilitychange", async () => {
+  if (!sb || !uid) return;
+  if (document.visibilityState === "hidden"){ hiddenAt = Date.now(); if (pendingSave) saveNow(); return; }
+  if (!unlocked) return;
+  if (ls.get(PK_KEY) && hiddenAt && Date.now() - hiddenAt > 5*60*1000){ unlocked = false; lockScreen(); return; }
+  if (!pendingSave && !$("#sheet-root").innerHTML){ await loadData(); render(); }
+});
+
+async function boot(){
+  if (CONFIG.SUPABASE_URL.startsWith("PASTE") || CONFIG.SUPABASE_KEY.startsWith("PASTE")){
+    showGate(`${lockIcon}<h1>Almost ready</h1><p class="sub">This page still needs its Supabase details. Open index.html and paste the Project URL and key at the top, where it says PASTE.</p>`); return;
+  }
+  if (!window.supabase){ showGate(`${lockIcon}<h1>Can't connect</h1><p class="sub">Check your internet, then close and reopen this page.</p>`); return; }
+  sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY, { auth: { persistSession:true, autoRefreshToken:true } });
+  passkeySupported();
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session){ loginScreen(); return; }
+  uid = session.user.id; userEmail = session.user.email || "";
+  if (ls.get(PK_KEY)) lockScreen(); else openApp();
+}
+boot();
+})();
+
+</script>
+</body>
+</html>
